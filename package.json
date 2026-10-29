@@ -1,0 +1,12 @@
+{
+  "name": "cafe-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cafe Mobile - cardapio, pedido e camera (projeto de estudo)",
+  "scripts": {
+    "qr": "node dev/servidor.js"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
