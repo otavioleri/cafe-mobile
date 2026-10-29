@@ -93,7 +93,7 @@ function carregarFotos() {
   return [];
 }
 
-let fotos = carregarFotos(); // cada foto: { imagem: "data:image/jpeg...", data: "01/10/2026 10:30" }
+let fotos = carregarFotos(); // cada foto: { imagem: "data:image/jpeg...", legenda: "Meu café" }
 
 function salvarFotos() {
   try {
@@ -106,10 +106,25 @@ function salvarFotos() {
   }
 }
 
+// 4.3 - Legenda: pergunta o texto antes de salvar.
+// Se o usuário cancelar (null), a foto não é salva.
+function pedirLegenda() {
+  const legenda = prompt("Legenda da foto:");
+  if (legenda === null) {
+    return null;
+  }
+  return legenda.trim() || "Sem legenda";
+}
+
 // Desenha uma imagem (do vídeo ou de um arquivo) no canvas, já reduzida,
 // e guarda o resultado na galeria
 function guardarImagem(fonte, larguraOriginal, alturaOriginal) {
-  const largura = 480; // reduzimos para não lotar o armazenamento
+  const legenda = pedirLegenda();
+  if (legenda === null) {
+    return false;
+  }
+
+  const largura = 1080; // reduzimos para não lotar o armazenamento
   const altura = Math.round((alturaOriginal / larguraOriginal) * largura);
   canvas.width = largura;
   canvas.height = altura;
@@ -117,22 +132,25 @@ function guardarImagem(fonte, larguraOriginal, alturaOriginal) {
   const contexto = canvas.getContext("2d");
   contexto.drawImage(fonte, 0, 0, largura, altura);
 
-  // Transforma o desenho em texto (base64) no formato JPEG, qualidade 70%
-  const imagem = canvas.toDataURL("image/jpeg", 0.7);
+  // Transforma o desenho em texto (base64) no formato JPEG, qualidade 95%
+  const imagem = canvas.toDataURL("image/jpeg", 0.95);
 
-  fotos.unshift({ imagem: imagem, data: new Date().toLocaleString("pt-BR") }); // unshift = coloca no começo
+  fotos.unshift({ imagem: imagem, legenda: legenda }); // unshift = coloca no começo
   if (fotos.length > 12) {
     fotos.pop(); // guardamos no máximo 12 fotos
   }
   salvarFotos();
   mostrarGaleria();
+  return true;
 }
 
 function tirarFoto() {
   if (!stream) {
     return;
   }
-  guardarImagem(video, video.videoWidth, video.videoHeight);
+  if (!guardarImagem(video, video.videoWidth, video.videoHeight)) {
+    return; // cancelou a legenda
+  }
 
   // Efeito de flash + vibração, como uma câmera de verdade
   areaCamera.classList.remove("flash");
@@ -152,26 +170,48 @@ inputFoto.addEventListener("change", function () {
   }
   const img = new Image();
   img.onload = function () {
-    guardarImagem(img, img.naturalWidth, img.naturalHeight);
+    if (guardarImagem(img, img.naturalWidth, img.naturalHeight)) {
+      mostrarAviso("📸 Foto salva na galeria");
+    }
     URL.revokeObjectURL(img.src);
-    mostrarAviso("📸 Foto salva na galeria");
   };
   img.src = URL.createObjectURL(arquivo);
   inputFoto.value = ""; // permite escolher a mesma foto de novo
 });
 
+// Evita que uma legenda com <, > ou aspas quebre o HTML da galeria
+function escaparHtml(texto) {
+  return String(texto).replace(/[&<>"']/g, function (caractere) {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[caractere];
+  });
+}
+
 function mostrarGaleria() {
   galeria.innerHTML = "";
+
   if (fotos.length === 0) {
     galeria.innerHTML = '<p class="vazio">Nenhuma foto ainda.</p>';
     return;
   }
+
+  // Cria e adiciona o elemento com a contagem de fotos
+  const contador = document.createElement("p");
+  contador.className = "contador-fotos";
+  contador.textContent = `Total de fotos: ${fotos.length}`;
+  galeria.appendChild(contador);
+
   for (const foto of fotos) {
     const div = document.createElement("div");
     div.className = "foto";
     div.innerHTML = `
       <img src="${foto.imagem}" alt="Foto do meu café">
-      <small>${foto.data}</small>
+      <small>${escaparHtml(foto.legenda || foto.data || "")}</small>
     `;
     galeria.appendChild(div);
   }
