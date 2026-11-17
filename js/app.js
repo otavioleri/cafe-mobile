@@ -1,15 +1,9 @@
-// ==========================================================
-// app.js - Dia 4: abas, pedido, localStorage e vibração
-// (a câmera fica em camera.js)
-// ==========================================================
 
-// ---------- Utilidades ----------
 
 function formatarPreco(valor) {
   return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-// Mostra uma mensagem rápida na parte de baixo da tela
 let temporizadorAviso;
 function mostrarAviso(texto) {
   const aviso = document.querySelector("#aviso");
@@ -21,32 +15,27 @@ function mostrarAviso(texto) {
   }, 2000);
 }
 
-// RECURSO DE HARDWARE: motor de vibração do celular
-// padrao pode ser um número (ms) ou uma lista: [vibra, pausa, vibra...]
 function vibrar(padrao) {
-  // Nem todo aparelho tem vibração (iPhone e computador não têm esta API)
+
   if ("vibrate" in navigator) {
     navigator.vibrate(padrao);
   }
 }
-
-// ---------- Navegação por abas ----------
 
 const abas = document.querySelectorAll(".aba");
 const telas = document.querySelectorAll(".tela");
 
 function abrirTela(idTela) {
   for (const tela of telas) {
-    tela.hidden = tela.id !== idTela; // esconde todas, menos a escolhida
+    tela.hidden = tela.id !== idTela;
   }
   for (const aba of abas) {
     aba.classList.toggle("ativa", aba.dataset.tela === idTela);
   }
   window.scrollTo(0, 0);
 
-  // Saiu da tela da câmera? Desliga a câmera para economizar bateria
   if (idTela !== "tela-camera") {
-    desligarCamera(); // função que está em camera.js
+    desligarCamera();
   }
 }
 
@@ -55,8 +44,6 @@ for (const aba of abas) {
     abrirTela(aba.dataset.tela);
   });
 }
-
-// ---------- Cardápio ----------
 
 const listaProdutos = document.querySelector("#lista-produtos");
 const botoesFiltro = document.querySelectorAll(".filtro");
@@ -98,28 +85,22 @@ for (const botao of botoesFiltro) {
   });
 }
 
-// ---------- Pedido ----------
-
-// localStorage só guarda TEXTO. Por isso usamos JSON:
-//   JSON.stringify(lista) -> transforma a lista em texto
-//   JSON.parse(texto)     -> transforma o texto de volta em lista
 function carregarPedido() {
   const salvo = localStorage.getItem("pedido");
   if (salvo) {
     return JSON.parse(salvo);
   }
-  return []; // nada salvo ainda: pedido vazio
+  return [];
 }
 
 function salvarPedido() {
   localStorage.setItem("pedido", JSON.stringify(pedido));
 }
 
-// Cada item do pedido: { id, nome, preco, quantidade }
 let pedido = carregarPedido();
 
 function adicionarAoPedido(produto) {
-  // Procura se o produto já está no pedido
+
   const item = pedido.find(function (i) {
     return i.id === produto.id;
   });
@@ -132,11 +113,10 @@ function adicionarAoPedido(produto) {
 
   salvarPedido();
   mostrarPedido();
-  vibrar(50); // vibração curtinha
+  vibrar(50);
   mostrarAviso(produto.emoji + " " + produto.nome + " adicionado");
 }
 
-// mudanca = +1 ou -1
 function alterarQuantidade(id, mudanca) {
   const item = pedido.find(function (i) {
     return i.id === id;
@@ -144,7 +124,7 @@ function alterarQuantidade(id, mudanca) {
   item.quantidade = item.quantidade + mudanca;
 
   if (item.quantidade <= 0) {
-    // filter cria uma nova lista SEM o item zerado
+
     pedido = pedido.filter(function (i) {
       return i.id !== id;
     });
@@ -195,19 +175,19 @@ function mostrarPedido() {
 
   document.querySelector("#total-pedido").textContent = formatarPreco(calcularTotal());
 
-  // Bolinha vermelha com a quantidade, na aba "Pedido"
   const contador = document.querySelector("#contador-pedido");
   contador.textContent = quantidadeTotal;
   contador.hidden = quantidadeTotal === 0;
 
   document.querySelector("#btn-finalizar").disabled = pedido.length === 0;
+  document.querySelector("#btn-compartilhar-pedido").disabled = pedido.length === 0;
 }
 
 function finalizarPedido() {
   if (pedido.length === 0) {
     return;
   }
-  vibrar([100, 50, 100, 50, 200]); // padrão "comemoração"
+  vibrar([100, 50, 100, 50, 200]);
   mostrarAviso("Pedido enviado! Total: " + formatarPreco(calcularTotal()));
   pedido = [];
   salvarPedido();
@@ -216,6 +196,5 @@ function finalizarPedido() {
 
 document.querySelector("#btn-finalizar").addEventListener("click", finalizarPedido);
 
-// ---------- Início ----------
 mostrarCardapio("Todos");
 mostrarPedido();

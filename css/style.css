@@ -1,13 +1,9 @@
-/* ==========================================================
-   Café Mobile - estilos
-   Mobile-first: escrevemos primeiro para a tela do celular.
-   ========================================================== */
 
-/* Variáveis de cor: mude aqui para personalizar o app inteiro */
+
 :root {
-  --cor-principal: #6f4e37;   /* marrom café */
-  --cor-destaque: #d4a373;    /* caramelo */
-  --cor-fundo: #fff8f0;       /* creme */
+  --cor-principal: #6f4e37;
+  --cor-destaque: #d4a373;
+  --cor-fundo: #fff8f0;
   --cor-card: #ffffff;
   --cor-texto: #2b2118;
   --cor-texto-suave: #7a6a5c;
@@ -15,7 +11,6 @@
   --sombra: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Faz padding e borda contarem dentro da largura */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -31,13 +26,12 @@ body {
 
 main {
   padding: 16px;
-  max-width: 600px;     /* no computador, não fica largo demais */
+  max-width: 600px;
   margin: 0 auto;
 }
 
-/* ---------- Topo ---------- */
 .topo {
-  position: sticky;      /* fica preso no topo ao rolar */
+  position: sticky;
   top: 0;
   z-index: 10;
   display: flex;
@@ -52,11 +46,10 @@ main {
   font-size: 1.3rem;
 }
 
-/* ---------- Filtros de categoria ---------- */
 .filtros {
   display: flex;
   gap: 8px;
-  overflow-x: auto;      /* rolagem lateral no celular */
+  overflow-x: auto;
   padding-bottom: 8px;
   margin-bottom: 12px;
 }
@@ -77,7 +70,6 @@ main {
   color: #fff;
 }
 
-/* ---------- Cards de produto ---------- */
 .lista-produtos {
   display: flex;
   flex-direction: column;
@@ -107,7 +99,7 @@ main {
 }
 
 .card-info {
-  flex: 1;               /* ocupa o espaço que sobrar */
+  flex: 1;
 }
 
 .card-info h3 {
@@ -124,7 +116,7 @@ main {
 }
 
 .btn-adicionar {
-  width: 44px;           /* 44px = tamanho mínimo confortável para o dedo */
+  width: 44px;
   height: 44px;
   border: none;
   border-radius: 50%;
@@ -136,10 +128,9 @@ main {
 }
 
 .btn-adicionar:active {
-  transform: scale(0.9); /* "afunda" ao tocar */
+  transform: scale(0.9);
 }
 
-/* Telas maiores: dois cards por linha */
 @media (min-width: 700px) {
   main {
     max-width: 900px;
@@ -150,9 +141,8 @@ main {
   }
 }
 
-/* ---------- Telas e abas de navegação ---------- */
 main {
-  padding-bottom: 90px;  /* espaço para a barra de abas */
+  padding-bottom: 90px;
 }
 
 .tela h2 {
@@ -167,7 +157,7 @@ main {
   display: flex;
   background: #fff;
   border-top: 1px solid #eadfd3;
-  padding-bottom: env(safe-area-inset-bottom); /* iPhone com "barrinha" */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .aba {
@@ -207,7 +197,6 @@ main {
   line-height: 20px;
 }
 
-/* ---------- Pedido ---------- */
 .lista-pedido {
   list-style: none;
   display: flex;
@@ -289,7 +278,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ---------- Aviso rápido (toast) ---------- */
 .aviso {
   position: fixed;
   left: 50%;
@@ -311,7 +299,6 @@ button:disabled {
   transform: translate(-50%, 0);
 }
 
-/* ---------- Câmera ---------- */
 .dica {
   color: var(--cor-texto-suave);
   margin-bottom: 12px;
@@ -351,12 +338,10 @@ button:disabled {
   color: #aaa;
 }
 
-/* Câmera frontal: espelha como um espelho de verdade */
 video.espelhado {
   transform: scaleX(-1);
 }
 
-/* "Flash" branco ao tirar a foto */
 .area-camera.flash::after {
   content: "";
   position: absolute;
@@ -385,7 +370,6 @@ video.espelhado {
   font-size: 0.9rem;
 }
 
-/* Botão redondo de disparo, como nos apps de câmera */
 .btn-foto {
   width: 64px;
   height: 64px;
@@ -438,4 +422,27 @@ video.espelhado {
 
 .galeria .vazio {
   grid-column: 1 / -1;
+}
+
+.btn-instalar {
+  padding: 6px 14px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.foto-acoes {
+  display: flex;
+}
+
+.foto-acoes button {
+  flex: 1;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  cursor: pointer;
 }

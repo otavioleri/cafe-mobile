@@ -1,8 +1,4 @@
-// ==========================================================
-// dados.js - o cardápio da cafeteria
-// Um ARRAY (lista) de OBJETOS. Cada objeto é um produto.
-// Para mudar o cardápio, basta editar esta lista.
-// ==========================================================
+
 
 const produtos = [
   { id: 1,  nome: "Espresso",        descricao: "Café curto e encorpado",          preco: 6.00,  categoria: "Cafés",    emoji: "☕" },

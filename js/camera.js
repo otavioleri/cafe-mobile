@@ -1,8 +1,4 @@
-// ==========================================================
-// camera.js - Dia 4: câmera do celular e galeria de fotos
-// RECURSO DE HARDWARE: câmera (frontal e traseira)
-// Exige HTTPS (ou arquivo local/localhost) e permissão do usuário.
-// ==========================================================
+
 
 const areaCamera = document.querySelector("#area-camera");
 const video = document.querySelector("#video");
@@ -13,34 +9,31 @@ const btnTrocarCamera = document.querySelector("#btn-trocar-camera");
 const inputFoto = document.querySelector("#input-foto");
 const galeria = document.querySelector("#galeria");
 
-let stream = null;                 // a "transmissão" da câmera ligada
-let cameraAtual = "environment";   // "environment" = traseira, "user" = frontal
+let stream = null;
+let cameraAtual = "environment";
 
-// ---------- Ligar e desligar ----------
-
-// async/await: esperamos o usuário responder ao pedido de permissão
 async function ligarCamera() {
-  // O navegador tem acesso à câmera? (sem HTTPS, mediaDevices nem existe)
+
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     mostrarAviso("Câmera indisponível. Abra o app pelo link https://");
     return;
   }
 
-  desligarCamera(); // se já estava ligada, desliga antes de trocar
+  desligarCamera();
 
   try {
     stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: cameraAtual },
       audio: false
     });
-    video.srcObject = stream;               // liga o vídeo na câmera
+    video.srcObject = stream;
     video.classList.toggle("espelhado", cameraAtual === "user");
     areaCamera.classList.add("ligada");
     btnFoto.disabled = false;
     btnTrocarCamera.disabled = false;
     btnLigarCamera.textContent = "Desligar";
   } catch (erro) {
-    // NotAllowedError = usuário negou | NotFoundError = sem câmera
+
     console.log(erro);
     if (erro.name === "NotAllowedError") {
       mostrarAviso("Você precisa permitir o uso da câmera");
@@ -52,7 +45,7 @@ async function ligarCamera() {
 
 function desligarCamera() {
   if (stream) {
-    // Cada "track" é um sensor em uso; stop() desliga (e apaga a luz da câmera)
+
     for (const track of stream.getTracks()) {
       track.stop();
     }
@@ -83,8 +76,6 @@ btnLigarCamera.addEventListener("click", function () {
 });
 btnTrocarCamera.addEventListener("click", trocarCamera);
 
-// ---------- Fotos ----------
-
 function carregarFotos() {
   const salvas = localStorage.getItem("fotos");
   if (salvas) {
@@ -93,38 +84,21 @@ function carregarFotos() {
   return [];
 }
 
-let fotos = carregarFotos(); // cada foto: { imagem: "data:image/jpeg...", legenda: "Meu café" }
+let fotos = carregarFotos();
 
 function salvarFotos() {
   try {
     localStorage.setItem("fotos", JSON.stringify(fotos));
   } catch (erro) {
-    // localStorage tem limite (~5 MB). Se encher, apagamos a foto mais antiga.
+
     fotos.pop();
     mostrarAviso("Galeria cheia: a foto mais antiga foi removida");
     salvarFotos();
   }
 }
 
-// 4.3 - Legenda: pergunta o texto antes de salvar.
-// Se o usuário cancelar (null), a foto não é salva.
-function pedirLegenda() {
-  const legenda = prompt("Legenda da foto:");
-  if (legenda === null) {
-    return null;
-  }
-  return legenda.trim() || "Sem legenda";
-}
-
-// Desenha uma imagem (do vídeo ou de um arquivo) no canvas, já reduzida,
-// e guarda o resultado na galeria
 function guardarImagem(fonte, larguraOriginal, alturaOriginal) {
-  const legenda = pedirLegenda();
-  if (legenda === null) {
-    return false;
-  }
-
-  const largura = 1080; // reduzimos para não lotar o armazenamento
+  const largura = 480;
   const altura = Math.round((alturaOriginal / larguraOriginal) * largura);
   canvas.width = largura;
   canvas.height = altura;
@@ -132,29 +106,24 @@ function guardarImagem(fonte, larguraOriginal, alturaOriginal) {
   const contexto = canvas.getContext("2d");
   contexto.drawImage(fonte, 0, 0, largura, altura);
 
-  // Transforma o desenho em texto (base64) no formato JPEG, qualidade 95%
-  const imagem = canvas.toDataURL("image/jpeg", 0.95);
+  const imagem = canvas.toDataURL("image/jpeg", 0.7);
 
-  fotos.unshift({ imagem: imagem, legenda: legenda }); // unshift = coloca no começo
+  fotos.unshift({ imagem: imagem, data: new Date().toLocaleString("pt-BR") });
   if (fotos.length > 12) {
-    fotos.pop(); // guardamos no máximo 12 fotos
+    fotos.pop();
   }
   salvarFotos();
   mostrarGaleria();
-  return true;
 }
 
 function tirarFoto() {
   if (!stream) {
     return;
   }
-  if (!guardarImagem(video, video.videoWidth, video.videoHeight)) {
-    return; // cancelou a legenda
-  }
+  guardarImagem(video, video.videoWidth, video.videoHeight);
 
-  // Efeito de flash + vibração, como uma câmera de verdade
   areaCamera.classList.remove("flash");
-  void areaCamera.offsetWidth; // truque para reiniciar a animação
+  void areaCamera.offsetWidth;
   areaCamera.classList.add("flash");
   vibrar(30);
   mostrarAviso("📸 Foto salva na galeria");
@@ -162,7 +131,6 @@ function tirarFoto() {
 
 btnFoto.addEventListener("click", tirarFoto);
 
-// Jeito simples: <input type="file" capture> abre o app de câmera do celular
 inputFoto.addEventListener("change", function () {
   const arquivo = inputFoto.files[0];
   if (!arquivo) {
@@ -170,52 +138,35 @@ inputFoto.addEventListener("change", function () {
   }
   const img = new Image();
   img.onload = function () {
-    if (guardarImagem(img, img.naturalWidth, img.naturalHeight)) {
-      mostrarAviso("📸 Foto salva na galeria");
-    }
+    guardarImagem(img, img.naturalWidth, img.naturalHeight);
     URL.revokeObjectURL(img.src);
+    mostrarAviso("📸 Foto salva na galeria");
   };
   img.src = URL.createObjectURL(arquivo);
-  inputFoto.value = ""; // permite escolher a mesma foto de novo
+  inputFoto.value = "";
 });
-
-// Evita que uma legenda com <, > ou aspas quebre o HTML da galeria
-function escaparHtml(texto) {
-  return String(texto).replace(/[&<>"']/g, function (caractere) {
-    return {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    }[caractere];
-  });
-}
 
 function mostrarGaleria() {
   galeria.innerHTML = "";
-
   if (fotos.length === 0) {
     galeria.innerHTML = '<p class="vazio">Nenhuma foto ainda.</p>';
     return;
   }
-
-  // Cria e adiciona o elemento com a contagem de fotos
-  const contador = document.createElement("p");
-  contador.className = "contador-fotos";
-  contador.textContent = `Total de fotos: ${fotos.length}`;
-  galeria.appendChild(contador);
-
   for (const foto of fotos) {
     const div = document.createElement("div");
     div.className = "foto";
     div.innerHTML = `
       <img src="${foto.imagem}" alt="Foto do meu café">
-      <small>${escaparHtml(foto.legenda || foto.data || "")}</small>
+      <small>${foto.data}</small>
+      <div class="foto-acoes">
+        <button class="btn-compartilhar-foto" aria-label="Compartilhar foto">📤</button>
+      </div>
     `;
+    div.querySelector(".btn-compartilhar-foto").addEventListener("click", function () {
+      compartilharFoto(foto);
+    });
     galeria.appendChild(div);
   }
 }
 
-// ---------- Início ----------
 mostrarGaleria();
