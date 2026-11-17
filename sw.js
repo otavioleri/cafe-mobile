@@ -1,6 +1,6 @@
 
 
-const CACHE = "cafe-mobile-v1";
+const CACHE = "cafe-mobile-v2";
 
 const ARQUIVOS = [
   "./",

@@ -160,10 +160,21 @@ function mostrarGaleria() {
       <small>${foto.data}</small>
       <div class="foto-acoes">
         <button class="btn-compartilhar-foto" aria-label="Compartilhar foto">📤</button>
+        <button class="btn-apagar-foto" aria-label="Apagar foto">🗑️</button>
       </div>
     `;
     div.querySelector(".btn-compartilhar-foto").addEventListener("click", function () {
       compartilharFoto(foto);
+    });
+    div.querySelector(".btn-apagar-foto").addEventListener("click", function () {
+      if (confirm("Deseja apagar esta foto?")) {
+        fotos = fotos.filter(function (item) {
+          return item !== foto;
+        });
+        salvarFotos();
+        mostrarGaleria();
+        mostrarAviso("Foto apagada");
+      }
     });
     galeria.appendChild(div);
   }
